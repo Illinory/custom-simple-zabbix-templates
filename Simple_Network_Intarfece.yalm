@@ -1,0 +1,67 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 7b1d1185b835414da783483f686e9825
+      name: Cisco
+  templates:
+    - uuid: d76eab250c6946a38ab43fc1657a14da
+      template: 'Cisco Network Inteface'
+      name: 'Cisco Network Inteface'
+      description: 'Simple Cisco interface Template with graphs'
+      groups:
+        - name: Cisco
+      discovery_rules:
+        - uuid: e9b9eae422bd48ee838ca349138bc2e1
+          name: 'Interfaces Discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#IFDESCR},IF-MIB::ifDescr]'
+          key: ifDescr
+          delay: 1h
+          item_prototypes:
+            - uuid: 1c7b083c93df45039e15fa959124f712
+              name: '{#IFDESCR} In'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.2.1.2.2.1.10.{#SNMPINDEX}'
+              key: 'interface.in.[{#IFDESCR}]'
+              trends: 90d
+              units: bps
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: Application
+                  value: Interfaces
+            - uuid: 8ddff9f760364caba5da8b50d2f3ffdf
+              name: '{#IFDESCR} Out'
+              type: SNMP_AGENT
+              snmp_oid: '.1.3.6.1.2.1.2.2.1.16.{#SNMPINDEX}'
+              key: 'interface.out.[{#IFDESCR}]'
+              trends: 90d
+              units: bps
+              preprocessing:
+                - type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                - type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                - tag: Application
+                  value: Interfaces
+          graph_prototypes:
+            - uuid: 18913535bc9e4cdfac49361eac27588d
+              name: '{#IFDESCR} Traffic'
+              graph_items:
+                - color: 1A7C11
+                  item:
+                    host: 'Cisco Network Inteface'
+                    key: 'interface.in.[{#IFDESCR}]'
+                - sortorder: '1'
+                  color: FF0000
+                  item:
+                    host: 'Cisco Network Inteface'
+                    key: 'interface.out.[{#IFDESCR}]'
